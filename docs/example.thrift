@@ -1,4 +1,10 @@
 namespace go erproduct
+namespace * Product
+namespace csharp Zen.DataAccess.Product
+namespace java com.daigou.sg.rpc.product
+namespace objc TR
+namespace javascript TRPC
+namespace swift TR
 
 struct TShippingFee {
 	1:required string warehouse;	//仓库
@@ -127,12 +133,12 @@ struct TProductReviewCount {
 
 struct SearchFilterField {
 	1: required string name;
-	1: required i32 productCount;
+	2: required i32 productCount;
 }
 
 struct SearchFilter {
 	1: required string name;
-	1: required list<SearchFilterField> fields;
+	2: required list<SearchFilterField> fields;
 }
 
 struct SearchFilterCond {
@@ -160,54 +166,4 @@ service Product {
 	/// <returns>商品明细</returns>
 	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource),
 
-	/// 客户端自行处理缓存时间，30分钟？
-	list<string> GetHotSearch(),
-	SearchResult Search(1:string keyword, 2: list<SearchFilterCond> filters, 3: SearchSortCond sort, 4:i32 offset, 5:i32 limit),
-	/// 同上
-	SearchResult SearchByCategory(1:i32 categoryId, 2: list<SearchFilterCond> filters, 3: SearchSortCond sort, 4:i32 offset, 5:i32 limit),
-
-	SearchResult SearchBySeller(1:i32 sellerId, 2:string keyword, 3: list<SearchFilterCond> filters, 4: SearchSortCond sort, 5:i32 offset, 6:i32 limit),
-
-
-	/// <summary>
-	/// 获取商品评论列表
-	/// </summary>
-	/// <param name="productUrl">商品url</param>
-	/// <param name="hasPhoto">用于过滤商品评论是否包含图片</param>
-	/// <param name="offset">商品评论的起始位置</param>
-	/// <param name="limit">一次请求要获取的商品评论个数</param>
-	/// <returns>商品评论列表</returns>
-	list<TProductReviewDetail> GetReviews(1:string productUrl, 2:bool hasPhoto, 3:i32 offset, 4:i32 limit),
-
-	/// <summary>
-	/// 获取某个商品的评论个数
-	/// </summary>
-	/// <param name="productUrl">商品url</param>
-	/// <returns>商品的评论个数</returns>
-	TProductReviewCount GetReviewCount(1:string productUrl),
-
-	/// <summary>
-	/// 设置商品评论的采纳数
-	/// </summary>
-	/// <param name="productReviewDetailId">商品评论的id</param>
-	/// <param name="helpful">是否采纳</param>
-	void SetHelpful(1:i32 productReviewDetailId, 2:bool helpful),
-
-	/// <summary>
-	/// 获取商品明细
-	/// </summary>
-	/// <param name="productUrl">商品url</param>
-	/// <returns>商品明细</returns>
-	TProductExtension GetPrimeProductDetail(1:string productUrl, 2:string purchaseSource),
-
-	/// <summary>
-	/// 获取Prime商品分类
-	/// </summary>
-	/// <returns>商品分类</returns>
-	SearchResult SearchByPrimeCategory(1:i32 categoryId, 2: list<SearchFilterCond> filters, 3: SearchSortCond sort, 4:i32 offset, 5:i32 limit),
-
-	/// <summary>
-	/// Prime专区的搜索
-	/// </summary>
-	SearchResult PrimeSearch(1:string keyword, 2: list<SearchFilterCond> filters, 3: SearchSortCond sort, 4:i32 offset, 5:i32 limit)
 }
