@@ -1,7 +1,5 @@
 namespace go erproduct
-namespace * Product
 namespace csharp Zen.DataAccess.Product
-namespace java com.daigou.sg.rpc.product
 
 struct TShippingFee {
 	1:required string warehouse;	//仓库
@@ -159,12 +157,6 @@ exception TwitterUnavailable {
 }
 
 service Product {
-
-	/// <summary>
-	/// 获取商品明细
-	/// </summary>
-	/// <param name="productUrl">商品url</param>
-	/// <returns>商品明细</returns>
-	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond),
-	oneway void Ping(),
+	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond);
+	void Ping();
 }
