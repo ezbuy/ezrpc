@@ -1,0 +1,62 @@
+{{define "server" -}}
+package {{.Namespace }}
+{{$serviceName := .Service.Name}}
+import (
+	"bytes"
+
+	"github.com/nats-io/nats"
+	"github.com/samuel/go-thrift/thrift"
+)
+
+func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
+	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
+
+	switch msg.Subject {
+{{- range $method := .Service.Methods}}
+	case "{{$serviceName}}.{{$method.Name}}":
+{{- if $method.Oneway}}
+		p := &{{$serviceName}}{{$method.Name}}Request{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.{{$method.Name}}(p)
+		if err != nil {
+			println(err)
+		}
+{{- else}}
+		p := &{{$serviceName}}{{$method.Name}}Request{}
+		res := &{{$serviceName}}{{$method.Name}}Response{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.{{$method.Name}}(p, res)
+		if err != nil {
+			println(err)
+		}
+
+		buf := &bytes.Buffer{}
+		w := thrift.NewCompactProtocolWriter(buf)
+		thrift.EncodeStruct(w, res)
+		s.Conn.Publish(msg.Reply, buf.Bytes())
+{{- end}}
+{{- end}}
+	}
+}
+
+type ThriftNats{{$serviceName}}Server struct {
+	Server *{{$serviceName}}Server
+	Conn   *nats.Conn
+}
+
+func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
+	s := &{{$serviceName}}Server{Implementation: impl}
+
+	server := &ThriftNats{{$serviceName}}Server{
+		Server: s,
+		Conn:   conn,
+	}
+	server.Conn.Subscribe("{{$serviceName}}.*", server.onMsg)
+}
+{{- end}}

@@ -24,7 +24,7 @@ func TestMain(t *testing.T) {
 	var nc *nats.Conn
 	nc, _ = nats.Connect(nats.DefaultURL)
 	server := new(productServiceImplementation)
-	NewServer(server, nc)
+	NewProductServer(server, nc)
 	time.Sleep(10 * time.Millisecond)
 
 	client := ezrpc.NewClient("Product", nc)

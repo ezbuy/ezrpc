@@ -7,21 +7,10 @@ import (
 	"github.com/samuel/go-thrift/thrift"
 )
 
-func (s *ThriftNatsServer) onMsg(msg *nats.Msg) {
+func (s *ThriftNatsProductServer) onMsg(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	switch msg.Subject {
-	case "Product.Ping":
-		p := &ProductPingRequest{}
-		err := thrift.DecodeStruct(r, p)
-		if err != nil {
-			println(err)
-		}
-		err = s.Server.Ping(p)
-		if err != nil {
-			println(err)
-		}
-		println("onPing")
 	case "Product.GetProductDetail":
 		p := &ProductGetProductDetailRequest{}
 		res := &ProductGetProductDetailResponse{}
@@ -38,19 +27,28 @@ func (s *ThriftNatsServer) onMsg(msg *nats.Msg) {
 		w := thrift.NewCompactProtocolWriter(buf)
 		thrift.EncodeStruct(w, res)
 		s.Conn.Publish(msg.Reply, buf.Bytes())
+	case "Product.Ping":
+		p := &ProductPingRequest{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.Ping(p)
+		if err != nil {
+			println(err)
+		}
 	}
-
 }
 
-type ThriftNatsServer struct {
+type ThriftNatsProductServer struct {
 	Server *ProductServer
 	Conn   *nats.Conn
 }
 
-func NewServer(impl Product, conn *nats.Conn) {
+func NewProductServer(impl Product, conn *nats.Conn) {
 	s := &ProductServer{Implementation: impl}
 
-	server := &ThriftNatsServer{
+	server := &ThriftNatsProductServer{
 		Server: s,
 		Conn:   conn,
 	}
