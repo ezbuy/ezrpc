@@ -7,24 +7,39 @@ import (
 	"github.com/samuel/go-thrift/thrift"
 )
 
-func (s *ThriftNatsServer) onMSG(msg *nats.Msg) {
+func (s *ThriftNatsServer) onMsg(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
-	p := &ProductGetProductDetailRequest{}
-	res := &ProductGetProductDetailResponse{}
-	err := thrift.DecodeStruct(r, p)
-	if err != nil {
-		println(err)
-	}
-	err = s.Server.GetProductDetail(p, res)
-	if err != nil {
-		println(err)
+	switch msg.Subject {
+	case "Product.Ping":
+		p := &ProductPingRequest{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.Ping(p)
+		if err != nil {
+			println(err)
+		}
+		println("onPing")
+	case "Product.GetProductDetail":
+		p := &ProductGetProductDetailRequest{}
+		res := &ProductGetProductDetailResponse{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.GetProductDetail(p, res)
+		if err != nil {
+			println(err)
+		}
+
+		buf := &bytes.Buffer{}
+		w := thrift.NewCompactProtocolWriter(buf)
+		thrift.EncodeStruct(w, res)
+		s.Conn.Publish(msg.Reply, buf.Bytes())
 	}
 
-	buf := &bytes.Buffer{}
-	w := thrift.NewCompactProtocolWriter(buf)
-	thrift.EncodeStruct(w, res)
-	s.Conn.Publish(msg.Reply, buf.Bytes())
 }
 
 type ThriftNatsServer struct {
@@ -39,5 +54,5 @@ func NewServer(impl Product, conn *nats.Conn) {
 		Server: s,
 		Conn:   conn,
 	}
-	server.Conn.Subscribe("Product.GetProductDetail", server.onMSG)
+	server.Conn.Subscribe("Product.*", server.onMsg)
 }

@@ -29,6 +29,12 @@ func TestMain(t *testing.T) {
 
 	client := ezrpc.NewClient("Product", nc)
 	scr := ProductClient{Client: client}
+
+	err := scr.Ping()
+	if err != nil {
+		t.Error(err)
+	}
+
 	product, err := scr.GetProductDetail("productUrl", "surf")
 	if err != nil {
 		t.Error(err)
