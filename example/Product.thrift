@@ -1,4 +1,4 @@
-namespace go erproduct
+namespace go product
 namespace csharp Zen.DataAccess.Product
 
 struct TShippingFee {
