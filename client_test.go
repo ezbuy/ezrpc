@@ -70,7 +70,7 @@ func onFoo(msg *nats.Msg) {
 	p.Location = "xiamen"
 	w := thrift.NewCompactProtocolWriter(buf)
 	thrift.EncodeStruct(w, p)
-	nc.Publish(msg.Reply, buf.Bytes())
+	// nc.Publish(msg.Reply, buf.Bytes())
 }
 
 type productServiceImplementation int
@@ -82,11 +82,13 @@ func (s *productServiceImplementation) GetProductDetail(productUrl string, purch
 }
 
 func TestMain(t *testing.T) {
+	var nc *nats.Conn
+	nc, _ = nats.Connect(nats.DefaultURL)
 	server := new(productServiceImplementation)
-	NewServer(server)
+	NewServer(server, nc)
 	time.Sleep(10 * time.Millisecond)
 
-	client := NewClient("Product")
+	client := NewClient("Product", nc)
 	scr := erproduct.ProductClient{Client: client}
 	product, err := scr.GetProductDetail("productUrl", "surf")
 	if err != nil {
@@ -100,13 +102,12 @@ func TestMain(t *testing.T) {
 }
 
 func MainTEst() {
-
-	var nc *nats.Conn
-	client := NewClient("Product")
+	nc, _ := nats.Connect(nats.DefaultURL)
+	client := NewClient("Product", nc)
 	scr := erproduct.ProductClient{Client: client}
 	product, _ := scr.GetProductDetail("productUrl", "surf")
 	println(product.ProductUrl)
-	nc, _ = nats.Connect(nats.DefaultURL)
+
 	// nc.Request("", data, timeout)
 	buf := &bytes.Buffer{}
 	obj := &erproduct.SearchFilter{}
@@ -131,7 +132,7 @@ func MainTEst() {
 	thrift.EncodeStruct(w, obj)
 
 	// nc.Publish("foo", buf.Bytes())
-	nc.Subscribe("foo", onFoo)
+	// nc.Subscribe("foo", onFoo)
 	// nc.QueueSubscribe("foo", "miao", onFoo)
 
 	// nc.QueueSubscribe("foo", "miao", func(msg *nats.Msg) {

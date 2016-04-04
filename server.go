@@ -9,7 +9,6 @@ import (
 )
 
 func (s *ThriftNatsServer) onMSG(msg *nats.Msg) {
-	println("onMSG")
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	p := &erproduct.ProductGetProductDetailRequest{}
@@ -26,18 +25,20 @@ func (s *ThriftNatsServer) onMSG(msg *nats.Msg) {
 	buf := &bytes.Buffer{}
 	w := thrift.NewCompactProtocolWriter(buf)
 	thrift.EncodeStruct(w, res)
-	nc.Publish(msg.Reply, buf.Bytes())
+	s.Conn.Publish(msg.Reply, buf.Bytes())
 }
 
 type ThriftNatsServer struct {
 	Server *erproduct.ProductServer
+	Conn   *nats.Conn
 }
 
-func NewServer(impl erproduct.Product) {
+func NewServer(impl erproduct.Product, conn *nats.Conn) {
 	s := &erproduct.ProductServer{Implementation: impl}
 
 	server := &ThriftNatsServer{
 		Server: s,
+		Conn:   conn,
 	}
-	nc.Subscribe("Product.GetProductDetail", server.onMSG)
+	server.Conn.Subscribe("Product.GetProductDetail", server.onMSG)
 }
