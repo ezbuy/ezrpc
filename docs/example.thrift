@@ -2,9 +2,6 @@ namespace go erproduct
 namespace * Product
 namespace csharp Zen.DataAccess.Product
 namespace java com.daigou.sg.rpc.product
-namespace objc TR
-namespace javascript TRPC
-namespace swift TR
 
 struct TShippingFee {
 	1:required string warehouse;	//仓库
@@ -157,6 +154,10 @@ struct SearchResult {
 	3: list<SearchFilter> filters;
 }
 
+exception TwitterUnavailable {
+    1: string message;
+}
+
 service Product {
 
 	/// <summary>
@@ -164,6 +165,6 @@ service Product {
 	/// </summary>
 	/// <param name="productUrl">商品url</param>
 	/// <returns>商品明细</returns>
-	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource),
-
+	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond),
+	oneway void Ping(),
 }
