@@ -186,7 +186,7 @@ func (s *ProductServer) GetProductDetail(req *ProductGetProductDetailRequest, re
 	return err
 }
 
-func (s *ProductServer) Ping(req *ProductPingRequest, res *ProductPingResponse) error {
+func (s *ProductServer) Ping(req *ProductPingRequest) error {
 	err := s.Implementation.Ping()
 	return err
 }
@@ -204,7 +204,8 @@ type ProductGetProductDetailResponse struct {
 type ProductPingRequest struct {
 }
 
-type ProductPingResponse struct {
+func (r *ProductPingRequest) Oneway() bool {
+	return true
 }
 
 type ProductClient struct {
@@ -232,7 +233,7 @@ func (s *ProductClient) GetProductDetail(productUrl string, purchaseSource strin
 
 func (s *ProductClient) Ping() (err error) {
 	req := &ProductPingRequest{}
-	res := &ProductPingResponse{}
+	var res interface{} = nil
 	err = s.Client.Call("Ping", req, res)
 	return
 }

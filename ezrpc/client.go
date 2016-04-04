@@ -25,6 +25,10 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 	w := thrift.NewCompactProtocolWriter(buf)
 	thrift.EncodeStruct(w, request)
 
+	if response == nil {
+		return c.Conn.Publish(c.Serice+"."+method, buf.Bytes())
+	}
+
 	msg, err := c.Conn.Request(c.Serice+"."+method, buf.Bytes(), 10*time.Second)
 	if err != nil {
 		println(err.Error())

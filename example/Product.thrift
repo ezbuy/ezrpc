@@ -158,5 +158,5 @@ exception TwitterUnavailable {
 
 service Product {
 	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond);
-	void Ping();
+	oneway void Ping();
 }
