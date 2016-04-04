@@ -57,6 +57,6 @@ func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
 		Server: s,
 		Conn:   conn,
 	}
-	server.Conn.Subscribe("{{$serviceName}}.*", server.onMsg)
+	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", server.onMsg)
 }
 {{- end}}

@@ -52,5 +52,5 @@ func NewProductServer(impl Product, conn *nats.Conn) {
 		Server: s,
 		Conn:   conn,
 	}
-	server.Conn.Subscribe("Product.*", server.onMsg)
+	server.Conn.QueueSubscribe("Product.*", "ezrpc", server.onMsg)
 }
