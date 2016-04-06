@@ -9,31 +9,31 @@ struct TShippingFee {
 
 struct TProduct {
 	1:optional i64 cid;						//淘宝商品分类id
-	2:required string vendorName;			//卖家名
-	3:required string productName;			//商品名
-	4:required double unitPrice;			//单价
-	5:required double shippingFee;			//运费
-	6:required string productUrl;			//商品url
-	7:required string productImage;			//商品图片
-	8:required string originCode;			//采购国家
-	9:required string shopName;				//店铺名
-	10:required string location;			//卖家地址	
-	11:required string aroundwWarehouse;	//附近仓库
-	12:required bool isShippingFee;			//是否免国内运费
-	13:required i32 favoritesItemId;		//收藏商品id
-	14:required i32 favoriteCatId;			//收藏分类id
-	15:required string specialHandlingFeeMessage;	//美国商品手续费描述
-	16:required double specialHandlingFeePercent;	//美国商品手续费
+	2:optional string vendorName;			//卖家名
+	3:optional string productName;			//商品名
+	4:optional double unitPrice;			//单价
+	5:optional double shippingFee;			//运费
+	6:optional string productUrl;			//商品url
+	7:optional string productImage;			//商品图片
+	8:optional string originCode;			//采购国家
+	9:optional string shopName;				//店铺名
+	10:optional string location;			//卖家地址	
+	11:optional string aroundwWarehouse;	//附近仓库
+	12:optional bool isShippingFee;			//是否免国内运费
+	13:optional i32 favoritesItemId;		//收藏商品id
+	14:optional i32 favoriteCatId;			//收藏分类id
+	15:optional string specialHandlingFeeMessage;	//美国商品手续费描述
+	16:optional double specialHandlingFeePercent;	//美国商品手续费
 	17:optional list<string> propertyNames;			//商品规格描述
-	18:required list<TShippingFee> shippingFees;		//各仓库运费
+	18:optional list<TShippingFee> shippingFees;		//各仓库运费
 	19:optional list<string> descriptionImages;		//商品详细图片
 	20:optional list<TCharacteristicGroup> characteristicGroups; //可选sku列表
 	21:optional list<TSku> skus;			//商品sku列表
 	22:optional list<string> itemImgs;	
 	23:optional bool isEZBuy;  //是否是特殊商品
-	24:required string priceSymbol; //货币符号
-	25:required string localUnitPrice;	//汇率转换后的价格
-	26:required double localShipmentFee;		//汇率转换后的运费
+	24:optional string priceSymbol; //货币符号
+	25:optional string localUnitPrice;	//汇率转换后的价格
+	26:optional double localShipmentFee;		//汇率转换后的运费
 	27:optional string errMsg;				//错误信息
 }
 

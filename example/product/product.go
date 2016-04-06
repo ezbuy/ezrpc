@@ -49,31 +49,31 @@ type TCharacteristicGroup struct {
 
 type TProduct struct {
 	Cid                       *int64                  `thrift:"1" json:"cid,omitempty"`
-	VendorName                string                  `thrift:"2,required" json:"vendorName"`
-	ProductName               string                  `thrift:"3,required" json:"productName"`
-	UnitPrice                 float64                 `thrift:"4,required" json:"unitPrice"`
-	ShippingFee               float64                 `thrift:"5,required" json:"shippingFee"`
-	ProductUrl                string                  `thrift:"6,required" json:"productUrl"`
-	ProductImage              string                  `thrift:"7,required" json:"productImage"`
-	OriginCode                string                  `thrift:"8,required" json:"originCode"`
-	ShopName                  string                  `thrift:"9,required" json:"shopName"`
-	Location                  string                  `thrift:"10,required" json:"location"`
-	AroundwWarehouse          string                  `thrift:"11,required" json:"aroundwWarehouse"`
-	IsShippingFee             bool                    `thrift:"12,required" json:"isShippingFee"`
-	FavoritesItemId           int32                   `thrift:"13,required" json:"favoritesItemId"`
-	FavoriteCatId             int32                   `thrift:"14,required" json:"favoriteCatId"`
-	SpecialHandlingFeeMessage string                  `thrift:"15,required" json:"specialHandlingFeeMessage"`
-	SpecialHandlingFeePercent float64                 `thrift:"16,required" json:"specialHandlingFeePercent"`
+	VendorName                *string                 `thrift:"2" json:"vendorName,omitempty"`
+	ProductName               *string                 `thrift:"3" json:"productName,omitempty"`
+	UnitPrice                 *float64                `thrift:"4" json:"unitPrice,omitempty"`
+	ShippingFee               *float64                `thrift:"5" json:"shippingFee,omitempty"`
+	ProductUrl                *string                 `thrift:"6" json:"productUrl,omitempty"`
+	ProductImage              *string                 `thrift:"7" json:"productImage,omitempty"`
+	OriginCode                *string                 `thrift:"8" json:"originCode,omitempty"`
+	ShopName                  *string                 `thrift:"9" json:"shopName,omitempty"`
+	Location                  *string                 `thrift:"10" json:"location,omitempty"`
+	AroundwWarehouse          *string                 `thrift:"11" json:"aroundwWarehouse,omitempty"`
+	IsShippingFee             *bool                   `thrift:"12" json:"isShippingFee,omitempty"`
+	FavoritesItemId           *int32                  `thrift:"13" json:"favoritesItemId,omitempty"`
+	FavoriteCatId             *int32                  `thrift:"14" json:"favoriteCatId,omitempty"`
+	SpecialHandlingFeeMessage *string                 `thrift:"15" json:"specialHandlingFeeMessage,omitempty"`
+	SpecialHandlingFeePercent *float64                `thrift:"16" json:"specialHandlingFeePercent,omitempty"`
 	PropertyNames             []string                `thrift:"17" json:"propertyNames,omitempty"`
-	ShippingFees              []*TShippingFee         `thrift:"18,required" json:"shippingFees"`
+	ShippingFees              []*TShippingFee         `thrift:"18" json:"shippingFees,omitempty"`
 	DescriptionImages         []string                `thrift:"19" json:"descriptionImages,omitempty"`
 	CharacteristicGroups      []*TCharacteristicGroup `thrift:"20" json:"characteristicGroups,omitempty"`
 	Skus                      []*TSku                 `thrift:"21" json:"skus,omitempty"`
 	ItemImgs                  []string                `thrift:"22" json:"itemImgs,omitempty"`
 	IsEZBuy                   *bool                   `thrift:"23" json:"isEZBuy,omitempty"`
-	PriceSymbol               string                  `thrift:"24,required" json:"priceSymbol"`
-	LocalUnitPrice            string                  `thrift:"25,required" json:"localUnitPrice"`
-	LocalShipmentFee          float64                 `thrift:"26,required" json:"localShipmentFee"`
+	PriceSymbol               *string                 `thrift:"24" json:"priceSymbol,omitempty"`
+	LocalUnitPrice            *string                 `thrift:"25" json:"localUnitPrice,omitempty"`
+	LocalShipmentFee          *float64                `thrift:"26" json:"localShipmentFee,omitempty"`
 	ErrMsg                    *string                 `thrift:"27" json:"errMsg,omitempty"`
 }
 
