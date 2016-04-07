@@ -24,12 +24,7 @@ func (g *gen) Generate(output string, parsedThrift map[string]*parser.Thrift) {
 		log.Fatalf("failed to get absolute path of [%s]", output)
 	}
 
-	log.Println(path)
-
-	for file, parsed := range parsedThrift {
-		log.Println(file)
-		log.Printf("%+v", parsed)
-
+	for _, parsed := range parsedThrift {
 		ns := getNamespace(parsed)
 
 		// make output dir
@@ -48,36 +43,6 @@ func (g *gen) Generate(output string, parsedThrift map[string]*parser.Thrift) {
 			}
 		}
 	}
-
-	// outputPackageDirs := make([]string, 0, len(parsedThrift))
-
-	// fmt.Println("##### Parsing:")
-	// for filename, parsed := range parsedThrift {
-	// 	fmt.Printf("%s\n", filename)
-	// 	namespace := getNamespace(parsed.Namespaces)
-	// 	importPath, _ := genNamespace(namespace)
-
-	// 	// make output dir
-	// 	pkgDir := filepath.Join(outputPath, importPath)
-	// 	if err := os.MkdirAll(pkgDir, 0755); err != nil {
-	// 		panicWithErr("fail to make package directory %s", pkgDir)
-	// 	}
-
-	// 	outputPackageDirs = append(outputPackageDirs, pkgDir)
-
-	// 	// write file
-	// 	for name, service := range parsed.Services {
-	// 		fname := filepath.Join(pkgDir, "gen_"+name+"_server.go")
-	// 		data := ServerData{
-	// 			Namespace: namespace,
-	// 			Service:   service,
-	// 		}
-	// 		if err := outputFile(fname, "server", data); err != nil {
-	// 			panicWithErr("fail to write defines file %q : %s", fname, err)
-	// 		}
-	// 	}
-
-	// }
 }
 
 func getNamespace(t *parser.Thrift) string {

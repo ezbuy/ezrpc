@@ -5,11 +5,18 @@
  */
  
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using Thrift;
+using Thrift.Collections;
+using System.Runtime.Serialization;
+using Thrift.Protocol;
+using Thrift.Transport;
 
 namespace {{.Namespace}} {
 	public static void onMsg(object sender, MsgHandlerEventArgs e) {
-		Console.WriteLine(e.Message.Subject);
-
 		var trans = new Thrift.Transport.TMemoryBuffer(e.Message.Data);
 		var iprot = new EZProto(trans); // in
 		try {
@@ -27,8 +34,6 @@ namespace {{.Namespace}} {
 				var msg = new Msg();
 				msg.Subject = e.Message.Reply;
 				msg.Data = buf.GetBuffer();
-				
-				Console.WriteLine(msg.Data.Length);
 	
 				var sub = (IAsyncSubscription)sender;
 				sub.Connection.Publish(msg);
