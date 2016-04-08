@@ -1,6 +1,10 @@
 SHELL := /bin/bash
 
 init:
+	# go client
+	go get github.com/nats-io/nats
+	# server
+	go get github.com/nats-io/gnatsd
 	go get github.com/jteeuwen/go-bindata/...
 	
 buildtpl:
