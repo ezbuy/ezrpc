@@ -34,7 +34,7 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 
 		statsd.Incr("{{$serviceName}}.{{$method.Name}}.count")
 {{- else}}
-		t1 :=statsd.Now()
+		t1 := statsd.Now()
 
 		p := &{{$serviceName}}{{$method.Name}}Request{}
 		res := &{{$serviceName}}{{$method.Name}}Response{}
@@ -52,7 +52,7 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		thrift.EncodeStruct(w, res)
 		s.Conn.Publish(msg.Reply, buf.Bytes())
 
-		t2 :=statsd.Now()
+		t2 := statsd.Now()
 		statsd.Timing("{{$serviceName}}.{{$method.Name}}.timing", t1, t2)
 {{- end}}
 {{- end}}
