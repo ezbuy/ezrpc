@@ -1,0 +1,9 @@
+{
+	"statsd":{
+		"host": "192.168.199.61",
+		"port": 8125,
+		"project": "ezrpc",
+		"enable": true,
+		"sample_rate": 1
+	}
+}

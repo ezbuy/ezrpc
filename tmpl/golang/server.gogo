@@ -6,6 +6,7 @@ import (
 
 	"github.com/nats-io/nats"
 	"github.com/samuel/go-thrift/thrift"
+	"github.com/ezbuy/statsd"
 )
 
 type ThriftNats{{$serviceName}}Server struct {
@@ -30,7 +31,11 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		if err != nil {
 			println(err)
 		}
+
+		statsd.Incr("{{$serviceName}}.{{$method.Name}}.count")
 {{- else}}
+		t1 :=statsd.Now()
+
 		p := &{{$serviceName}}{{$method.Name}}Request{}
 		res := &{{$serviceName}}{{$method.Name}}Response{}
 		err := thrift.DecodeStruct(r, p)
@@ -46,6 +51,9 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		w := thrift.NewCompactProtocolWriter(buf)
 		thrift.EncodeStruct(w, res)
 		s.Conn.Publish(msg.Reply, buf.Bytes())
+
+		t2 :=statsd.Now()
+		statsd.Timing("{{$serviceName}}.{{$method.Name}}.timing", t1, t2)
 {{- end}}
 {{- end}}
 {{- end}}
