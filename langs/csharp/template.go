@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ezbuy/ezrpc/langs"
 	"github.com/ezbuy/ezrpc/tmpl"
 	"github.com/samuel/go-thrift/parser"
 )
@@ -31,7 +32,8 @@ func init() {
 	tpl = template.New("ezrpc/csharp")
 
 	funcs := template.FuncMap{
-		"ToLower": strings.ToLower,
+		"ToLower":           strings.ToLower,
+		"IsBroadcastMethod": langs.IsBroadcastMethod,
 	}
 	tpl.Funcs(funcs)
 

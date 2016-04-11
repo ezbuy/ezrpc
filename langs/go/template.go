@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ezbuy/ezrpc/langs"
 	"github.com/ezbuy/ezrpc/tmpl"
 )
 
@@ -17,7 +18,8 @@ func Tpl() *template.Template {
 func init() {
 	tpl = template.New("ezrpc/golang")
 	funcMap := template.FuncMap{
-		"ToLower": strings.ToLower,
+		"ToLower":           strings.ToLower,
+		"IsBroadcastMethod": langs.IsBroadcastMethod,
 	}
 	tpl.Funcs(funcMap)
 	files := []string{

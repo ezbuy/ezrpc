@@ -17,7 +17,7 @@ struct TProduct {
 	7:optional string productImage;			//商品图片
 	8:optional string originCode;			//采购国家
 	9:optional string shopName;				//店铺名
-	10:optional string location;			//卖家地址	
+	10:optional string location;			//卖家地址
 	11:optional string aroundwWarehouse;	//附近仓库
 	12:optional bool isShippingFee;			//是否免国内运费
 	13:optional i32 favoritesItemId;		//收藏商品id
@@ -29,7 +29,7 @@ struct TProduct {
 	19:optional list<string> descriptionImages;		//商品详细图片
 	20:optional list<TCharacteristicGroup> characteristicGroups; //可选sku列表
 	21:optional list<TSku> skus;			//商品sku列表
-	22:optional list<string> itemImgs;	
+	22:optional list<string> itemImgs;
 	23:optional bool isEZBuy;  //是否是特殊商品
 	24:optional string priceSymbol; //货币符号
 	25:optional string localUnitPrice;	//汇率转换后的价格
@@ -47,7 +47,7 @@ struct TProductExtension {
 	7:required string productImage;			//商品图片
 	8:required string originCode;			//采购国家
 	9:required string shopName;				//店铺名
-	10:required string location;			//卖家地址	
+	10:required string location;			//卖家地址
 	11:required string aroundwWarehouse;	//附近仓库
 	12:required bool isShippingFee;			//是否免国内运费
 	13:required i32 favoritesItemId;		//收藏商品id
@@ -59,7 +59,7 @@ struct TProductExtension {
 	19:optional list<string> descriptionImages;		//商品详细图片
 	20:optional list<TCharacteristicGroup> characteristicGroups; //可选sku列表
 	21:optional list<TSku> skus;			//商品sku列表
-	22:optional list<string> itemImgs;	
+	22:optional list<string> itemImgs;
 	23:optional bool isEZBuy;  //是否是特殊商品
 	24:required string priceSymbol; //货币符号
 	25:required string localUnitPrice;	//汇率转换后的价格
@@ -159,4 +159,8 @@ exception TwitterUnavailable {
 service Product {
 	TProduct GetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond);
 	oneway void Ping();
+
+	# broadcast
+	oneway void OnExchangeUpdate();
+	oneway void OnCacheEvict(1:string arg);
 }

@@ -8,11 +8,17 @@ import (
 	"github.com/samuel/go-thrift/thrift"
 )
 
+type ThriftNats{{$serviceName}}Server struct {
+	Server *{{$serviceName}}Server
+	Conn   *nats.Conn
+}
+
 func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	switch msg.Subject {
 {{- range $method := .Service.Methods}}
+{{- if not (IsBroadcastMethod $method)}}
 	case "{{$serviceName}}.{{$method.Name}}":
 {{- if $method.Oneway}}
 		p := &{{$serviceName}}{{$method.Name}}Request{}
@@ -42,12 +48,29 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		s.Conn.Publish(msg.Reply, buf.Bytes())
 {{- end}}
 {{- end}}
+{{- end}}
 	}
 }
 
-type ThriftNats{{$serviceName}}Server struct {
-	Server *{{$serviceName}}Server
-	Conn   *nats.Conn
+func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
+	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
+
+	switch msg.Subject {
+{{- range $method := .Service.Methods}}
+{{- if IsBroadcastMethod $method}}
+	case "On.{{$serviceName}}.{{$method.Name}}":
+		p := &{{$serviceName}}{{$method.Name}}Request{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.{{$method.Name}}(p)
+		if err != nil {
+			println(err)
+		}
+{{- end}}
+{{- end}}
+	}
 }
 
 func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
@@ -57,6 +80,9 @@ func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
 		Server: s,
 		Conn:   conn,
 	}
+
+	// all broadcast messages should be under namespace 'On'
+	server.Conn.Subscribe("On.{{$serviceName}}.*", server.onBroadcast)
 	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", server.onMsg)
 }
 {{- end}}
