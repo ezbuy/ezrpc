@@ -76,6 +76,8 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 		if err != nil {
 			println(err)
 		}
+
+		statsd.Incr("On.{{$serviceName}}.{{$method.Name}}.count")
 {{- end}}
 {{- end}}
 	}
