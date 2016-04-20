@@ -22,3 +22,7 @@ gengo: buildtpl
 	rm exe
 
 gen: gencsharp gengo
+
+clean:
+	rm -rf ./gengo
+	rm -rf ./gencsharp
