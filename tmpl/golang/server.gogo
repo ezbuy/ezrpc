@@ -1,5 +1,5 @@
 {{define "server" -}}
-package {{.Namespace }}
+package {{.Namespace}}
 {{$serviceName := .Service.Name}}
 import (
 	"bytes"
@@ -61,6 +61,7 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 }
 
 func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
+{{- if .HasBroadcastMethod}}
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	switch msg.Subject {
@@ -81,6 +82,7 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 {{- end}}
 {{- end}}
 	}
+{{- end}}
 }
 
 func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {

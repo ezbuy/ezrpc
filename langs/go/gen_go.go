@@ -39,6 +39,16 @@ type ServerData struct {
 	Service   *parser.Service
 }
 
+func (d ServerData) HasBroadcastMethod() bool {
+	for _, m := range d.Service.Methods {
+		if langs.IsBroadcastMethod(m) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (this *GoGen) Generate(output string, parsedThrift map[string]*parser.Thrift) {
 	this.BaseGen.Init(langName, parsedThrift)
 
