@@ -65,6 +65,9 @@ func (this *GoGen) Generate(output string, parsedThrift map[string]*parser.Thrif
 		namespace := getNamespace(parsed.Namespaces)
 		importPath, _ := genNamespace(namespace)
 
+		pkgs := strings.Split(namespace, ".")
+		pkg := pkgs[len(pkgs)-1]
+
 		// make output dir
 		pkgDir := filepath.Join(outputPath, importPath)
 		if err := os.MkdirAll(pkgDir, 0755); err != nil {
@@ -77,7 +80,7 @@ func (this *GoGen) Generate(output string, parsedThrift map[string]*parser.Thrif
 		for name, service := range parsed.Services {
 			fname := filepath.Join(pkgDir, "gen_"+name+"_server.go")
 			data := ServerData{
-				Namespace: namespace,
+				Namespace: pkg,
 				Service:   service,
 			}
 			if err := outputFile(fname, "server", data); err != nil {
