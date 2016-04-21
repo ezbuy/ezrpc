@@ -3,8 +3,8 @@ SHELL := /bin/bash
 init:
 	# go client
 	go get github.com/nats-io/nats
-	# server
-	go get github.com/nats-io/gnatsd
+	# statsd
+	go get github.com/ezbuy/statsd
 	go get github.com/jteeuwen/go-bindata/...
 
 buildtpl:
@@ -18,7 +18,7 @@ gencsharp: buildtpl
 
 gengo: buildtpl
 	go build -o exe
-	./exe gen -l go -i example/Product.thrift -o ./gengo
+	./exe gen -l go -i example/Product.thrift -o ./example
 	rm exe
 
 gen: gencsharp gengo
