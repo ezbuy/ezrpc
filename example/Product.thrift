@@ -163,4 +163,8 @@ service Product {
 	# broadcast
 	oneway void OnExchangeUpdate();
 	oneway void OnCacheEvict(1:string arg);
+
+	# direct
+	TProduct DirectGetProductDetail(1:string productUrl, 2:string purchaseSource) throws (1:TwitterUnavailable cond);
+	oneway void DirectOnCacheEvict();
 }

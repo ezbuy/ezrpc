@@ -10,8 +10,9 @@ import (
 )
 
 type ThriftNats{{$serviceName}}Server struct {
-	Server *{{$serviceName}}Server
-	Conn   *nats.Conn
+	Server    *{{$serviceName}}Server
+	Conn      *nats.Conn
+	DirectKey string
 }
 
 func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
@@ -19,7 +20,53 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 
 	switch msg.Subject {
 {{- range $method := .Service.Methods}}
-{{- if not (Utils.IsBroadcastMethod $method)}}
+{{- if Utils.IsNormalMethod $method}}
+	case "{{$serviceName}}.{{$method.Name}}":
+{{- if $method.Oneway}}
+		p := &{{$serviceName}}{{$method.Name}}Request{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.{{$method.Name}}(p)
+		if err != nil {
+			println(err)
+		}
+
+		statsd.Incr("{{$serviceName}}.{{$method.Name}}.count")
+{{- else}}
+		t1 := statsd.Now()
+
+		p := &{{$serviceName}}{{$method.Name}}Request{}
+		res := &{{$serviceName}}{{$method.Name}}Response{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.{{$method.Name}}(p, res)
+		if err != nil {
+			println(err)
+		}
+
+		buf := &bytes.Buffer{}
+		w := thrift.NewCompactProtocolWriter(buf)
+		thrift.EncodeStruct(w, res)
+		s.Conn.Publish(msg.Reply, buf.Bytes())
+
+		t2 := statsd.Now()
+		statsd.Timing("{{$serviceName}}.{{$method.Name}}.timing", t1, t2)
+{{- end}}
+{{- end}}
+{{- end}}
+	}
+}
+
+func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
+	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
+	keylen := len(s.DirectKey)
+	switch msg.Subject[keylen+1:] {
+{{- range $method := .Service.Methods}}
+{{- if Utils.IsDirectMethod $method}}
 	case "{{$serviceName}}.{{$method.Name}}":
 {{- if $method.Oneway}}
 		p := &{{$serviceName}}{{$method.Name}}Request{}
@@ -85,7 +132,12 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 {{- end}}
 }
 
-func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
+func (s *ThriftNats{{$serviceName}}Server) SetDirectKey(key string) {
+	s.DirectKey = key
+	s.Conn.Subscribe(key + ".{{$serviceName}}.*", s.onDirect)
+}
+
+func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) *ThriftNats{{$serviceName}}Server {
 	s := &{{$serviceName}}Server{Implementation: impl}
 
 	server := &ThriftNats{{$serviceName}}Server{
@@ -96,5 +148,6 @@ func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) {
 	// all broadcast messages should be under namespace 'On'
 	server.Conn.Subscribe("On.{{$serviceName}}.*", server.onBroadcast)
 	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", server.onMsg)
+	return server
 }
 {{- end}}

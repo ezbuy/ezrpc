@@ -167,6 +167,8 @@ func (e *TwitterUnavailable) Error() string {
 }
 
 type Product interface {
+	DirectGetProductDetail(productUrl string, purchaseSource string) (*TProduct, error)
+	DirectOnCacheEvict() error
 	GetProductDetail(productUrl string, purchaseSource string) (*TProduct, error)
 	OnCacheEvict(arg string) error
 	OnExchangeUpdate() error
@@ -175,6 +177,22 @@ type Product interface {
 
 type ProductServer struct {
 	Implementation Product
+}
+
+func (s *ProductServer) DirectGetProductDetail(req *ProductDirectGetProductDetailRequest, res *ProductDirectGetProductDetailResponse) error {
+	val, err := s.Implementation.DirectGetProductDetail(req.ProductUrl, req.PurchaseSource)
+	switch e := err.(type) {
+	case *TwitterUnavailable:
+		res.Cond = e
+		err = nil
+	}
+	res.Value = val
+	return err
+}
+
+func (s *ProductServer) DirectOnCacheEvict(req *ProductDirectOnCacheEvictRequest) error {
+	err := s.Implementation.DirectOnCacheEvict()
+	return err
 }
 
 func (s *ProductServer) GetProductDetail(req *ProductGetProductDetailRequest, res *ProductGetProductDetailResponse) error {
@@ -201,6 +219,23 @@ func (s *ProductServer) OnExchangeUpdate(req *ProductOnExchangeUpdateRequest) er
 func (s *ProductServer) Ping(req *ProductPingRequest) error {
 	err := s.Implementation.Ping()
 	return err
+}
+
+type ProductDirectGetProductDetailRequest struct {
+	ProductUrl     string `thrift:"1,required" json:"productUrl"`
+	PurchaseSource string `thrift:"2,required" json:"purchaseSource"`
+}
+
+type ProductDirectGetProductDetailResponse struct {
+	Value *TProduct           `thrift:"0" json:"value,omitempty"`
+	Cond  *TwitterUnavailable `thrift:"1" json:"cond,omitempty"`
+}
+
+type ProductDirectOnCacheEvictRequest struct {
+}
+
+func (r *ProductDirectOnCacheEvictRequest) Oneway() bool {
+	return true
 }
 
 type ProductGetProductDetailRequest struct {
@@ -237,6 +272,32 @@ func (r *ProductPingRequest) Oneway() bool {
 
 type ProductClient struct {
 	Client RPCClient
+}
+
+func (s *ProductClient) DirectGetProductDetail(productUrl string, purchaseSource string) (ret *TProduct, err error) {
+	req := &ProductDirectGetProductDetailRequest{
+		ProductUrl:     productUrl,
+		PurchaseSource: purchaseSource,
+	}
+	res := &ProductDirectGetProductDetailResponse{}
+	err = s.Client.Call("DirectGetProductDetail", req, res)
+	if err == nil {
+		switch {
+		case res.Cond != nil:
+			err = res.Cond
+		}
+	}
+	if err == nil {
+		ret = res.Value
+	}
+	return
+}
+
+func (s *ProductClient) DirectOnCacheEvict() (err error) {
+	req := &ProductDirectOnCacheEvictRequest{}
+	var res interface{} = nil
+	err = s.Client.Call("DirectOnCacheEvict", req, res)
+	return
 }
 
 func (s *ProductClient) GetProductDetail(productUrl string, purchaseSource string) (ret *TProduct, err error) {

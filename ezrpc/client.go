@@ -2,6 +2,7 @@ package ezrpc
 
 import (
 	"bytes"
+	"strings"
 	"time"
 
 	"github.com/nats-io/nats"
@@ -9,8 +10,9 @@ import (
 )
 
 type Client struct {
-	Conn   *nats.Conn
-	Serice string
+	Conn      *nats.Conn
+	Serice    string
+	DirectKey string
 }
 
 func NewClient(service string, conn *nats.Conn) *Client {
@@ -25,11 +27,18 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 	w := thrift.NewCompactProtocolWriter(buf)
 	thrift.EncodeStruct(w, request)
 
-	if response == nil {
-		return c.Conn.Publish(c.Serice+"."+method, buf.Bytes())
+	var subject string
+	if strings.HasPrefix(method, "Direct") {
+		subject = c.DirectKey + "." + c.Serice + "." + method
+	} else {
+		subject = c.Serice + "." + method
 	}
 
-	msg, err := c.Conn.Request(c.Serice+"."+method, buf.Bytes(), 10*time.Second)
+	if response == nil {
+		return c.Conn.Publish(subject, buf.Bytes())
+	}
+
+	msg, err := c.Conn.Request(subject, buf.Bytes(), 10*time.Second)
 	if err != nil {
 		println(err.Error())
 	}

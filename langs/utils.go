@@ -15,10 +15,14 @@ func Utils() *Util {
 
 var _util *Util
 
+func (u *Util) IsNormalMethod(m *parser.Method) bool {
+	return !u.IsBroadcastMethod(m) && !u.IsDirectMethod(m)
+}
+
 func (u *Util) IsBroadcastMethod(m *parser.Method) bool {
 	return m.Oneway && strings.HasPrefix(m.Name, "On")
 }
 
 func (u *Util) IsDirectMethod(m *parser.Method) bool {
-	return m.Oneway && strings.HasPrefix(m.Name, "Direct")
+	return strings.HasPrefix(m.Name, "Direct")
 }
