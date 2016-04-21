@@ -12,11 +12,20 @@ type productServiceImplementation int
 
 func (s *productServiceImplementation) GetProductDetail(productUrl string, purchaseSource string) (*TProduct, error) {
 	result := new(TProduct)
-	result.ProductUrl = productUrl + purchaseSource
+	r := productUrl + purchaseSource
+	result.ProductUrl = &r
 	return result, nil
 }
 
 func (s *productServiceImplementation) Ping() error {
+	return nil
+}
+
+func (s *productServiceImplementation) OnExchangeUpdate() error {
+	return nil
+}
+
+func (s *productServiceImplementation) OnCacheEvict(arg string) error {
 	return nil
 }
 
@@ -40,7 +49,7 @@ func TestMain(t *testing.T) {
 		t.Error(err)
 	}
 
-	if product.ProductUrl != "productUrlsurf" {
+	if *product.ProductUrl != "productUrlsurf" {
 		t.Error("server response error")
 	}
 }

@@ -168,6 +168,8 @@ func (e *TwitterUnavailable) Error() string {
 
 type Product interface {
 	GetProductDetail(productUrl string, purchaseSource string) (*TProduct, error)
+	OnCacheEvict(arg string) error
+	OnExchangeUpdate() error
 	Ping() error
 }
 
@@ -186,6 +188,16 @@ func (s *ProductServer) GetProductDetail(req *ProductGetProductDetailRequest, re
 	return err
 }
 
+func (s *ProductServer) OnCacheEvict(req *ProductOnCacheEvictRequest) error {
+	err := s.Implementation.OnCacheEvict(req.Arg)
+	return err
+}
+
+func (s *ProductServer) OnExchangeUpdate(req *ProductOnExchangeUpdateRequest) error {
+	err := s.Implementation.OnExchangeUpdate()
+	return err
+}
+
 func (s *ProductServer) Ping(req *ProductPingRequest) error {
 	err := s.Implementation.Ping()
 	return err
@@ -199,6 +211,21 @@ type ProductGetProductDetailRequest struct {
 type ProductGetProductDetailResponse struct {
 	Value *TProduct           `thrift:"0" json:"value,omitempty"`
 	Cond  *TwitterUnavailable `thrift:"1" json:"cond,omitempty"`
+}
+
+type ProductOnCacheEvictRequest struct {
+	Arg string `thrift:"1,required" json:"arg"`
+}
+
+func (r *ProductOnCacheEvictRequest) Oneway() bool {
+	return true
+}
+
+type ProductOnExchangeUpdateRequest struct {
+}
+
+func (r *ProductOnExchangeUpdateRequest) Oneway() bool {
+	return true
 }
 
 type ProductPingRequest struct {
@@ -228,6 +255,22 @@ func (s *ProductClient) GetProductDetail(productUrl string, purchaseSource strin
 	if err == nil {
 		ret = res.Value
 	}
+	return
+}
+
+func (s *ProductClient) OnCacheEvict(arg string) (err error) {
+	req := &ProductOnCacheEvictRequest{
+		Arg: arg,
+	}
+	var res interface{} = nil
+	err = s.Client.Call("OnCacheEvict", req, res)
+	return
+}
+
+func (s *ProductClient) OnExchangeUpdate() (err error) {
+	req := &ProductOnExchangeUpdateRequest{}
+	var res interface{} = nil
+	err = s.Client.Call("OnExchangeUpdate", req, res)
 	return
 }
 
