@@ -94,6 +94,11 @@ func (s *ThriftNatsProductServer) onDirect(msg *nats.Msg) {
 	}
 }
 
+func (s *ThriftNatsProductServer) SetDirectKey(key string) {
+	s.DirectKey = key
+	s.Conn.Subscribe(key + ".Product.*", s.onDirect)
+}
+
 func (s *ThriftNatsProductServer) onBroadcast(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
@@ -123,11 +128,6 @@ func (s *ThriftNatsProductServer) onBroadcast(msg *nats.Msg) {
 
 		statsd.Incr("On.Product.OnExchangeUpdate.count")
 	}
-}
-
-func (s *ThriftNatsProductServer) SetDirectKey(key string) {
-	s.DirectKey = key
-	s.Conn.Subscribe(key + ".Product.*", s.onDirect)
 }
 
 func NewProductServer(impl Product, conn *nats.Conn) *ThriftNatsProductServer {

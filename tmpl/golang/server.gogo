@@ -61,6 +61,8 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 	}
 }
 
+{{- if Utils.HasDirectMethod .Service}}
+
 func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 	keylen := len(s.DirectKey)
@@ -107,6 +109,12 @@ func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 	}
 }
 
+func (s *ThriftNats{{$serviceName}}Server) SetDirectKey(key string) {
+	s.DirectKey = key
+	s.Conn.Subscribe(key + ".{{$serviceName}}.*", s.onDirect)
+}
+{{- end}}
+
 func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 {{- if .HasBroadcastMethod}}
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
@@ -130,11 +138,6 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 {{- end}}
 	}
 {{- end}}
-}
-
-func (s *ThriftNats{{$serviceName}}Server) SetDirectKey(key string) {
-	s.DirectKey = key
-	s.Conn.Subscribe(key + ".{{$serviceName}}.*", s.onDirect)
 }
 
 func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) *ThriftNats{{$serviceName}}Server {

@@ -23,6 +23,15 @@ func (u *Util) IsBroadcastMethod(m *parser.Method) bool {
 	return m.Oneway && strings.HasPrefix(m.Name, "On")
 }
 
+func (u *Util) HasDirectMethod(s *parser.Service) bool {
+	for _, m := range s.Methods {
+		if u.IsDirectMethod(m) {
+			return true
+		}
+	}
+	return false
+}
+
 func (u *Util) IsDirectMethod(m *parser.Method) bool {
 	return strings.HasPrefix(m.Name, "Direct")
 }
