@@ -38,7 +38,7 @@ func init() {
 	tpl.Funcs(funcs)
 
 	files := []string{
-		"tmpl/csharp/server.tmpl",
+		"tmpl/csharp/server.gocs",
 	}
 
 	for _, f := range files {
