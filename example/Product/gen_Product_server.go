@@ -9,8 +9,9 @@ import (
 )
 
 type ThriftNatsProductServer struct {
-	Server *ProductServer
-	Conn   *nats.Conn
+	Server    *ProductServer
+	Conn      *nats.Conn
+	DirectKey string
 }
 
 func (s *ThriftNatsProductServer) onMsg(msg *nats.Msg) {
@@ -53,6 +54,46 @@ func (s *ThriftNatsProductServer) onMsg(msg *nats.Msg) {
 	}
 }
 
+func (s *ThriftNatsProductServer) onDirect(msg *nats.Msg) {
+	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
+	keylen := len(s.DirectKey)
+	switch msg.Subject[keylen+1:] {
+	case "Product.DirectGetProductDetail":
+		t1 := statsd.Now()
+
+		p := &ProductDirectGetProductDetailRequest{}
+		res := &ProductDirectGetProductDetailResponse{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.DirectGetProductDetail(p, res)
+		if err != nil {
+			println(err)
+		}
+
+		buf := &bytes.Buffer{}
+		w := thrift.NewCompactProtocolWriter(buf)
+		thrift.EncodeStruct(w, res)
+		s.Conn.Publish(msg.Reply, buf.Bytes())
+
+		t2 := statsd.Now()
+		statsd.Timing("Product.DirectGetProductDetail.timing", t1, t2)
+	case "Product.DirectOnCacheEvict":
+		p := &ProductDirectOnCacheEvictRequest{}
+		err := thrift.DecodeStruct(r, p)
+		if err != nil {
+			println(err)
+		}
+		err = s.Server.DirectOnCacheEvict(p)
+		if err != nil {
+			println(err)
+		}
+
+		statsd.Incr("Product.DirectOnCacheEvict.count")
+	}
+}
+
 func (s *ThriftNatsProductServer) onBroadcast(msg *nats.Msg) {
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
@@ -84,7 +125,12 @@ func (s *ThriftNatsProductServer) onBroadcast(msg *nats.Msg) {
 	}
 }
 
-func NewProductServer(impl Product, conn *nats.Conn) {
+func (s *ThriftNatsProductServer) SetDirectKey(key string) {
+	s.DirectKey = key
+	s.Conn.Subscribe(key + ".Product.*", s.onDirect)
+}
+
+func NewProductServer(impl Product, conn *nats.Conn) *ThriftNatsProductServer {
 	s := &ProductServer{Implementation: impl}
 
 	server := &ThriftNatsProductServer{
@@ -95,4 +141,5 @@ func NewProductServer(impl Product, conn *nats.Conn) {
 	// all broadcast messages should be under namespace 'On'
 	server.Conn.Subscribe("On.Product.*", server.onBroadcast)
 	server.Conn.QueueSubscribe("Product.*", "ezrpc", server.onMsg)
+	return server
 }

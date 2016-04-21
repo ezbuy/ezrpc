@@ -29,11 +29,24 @@ func (s *productServiceImplementation) OnCacheEvict(arg string) error {
 	return nil
 }
 
+func (s *productServiceImplementation) DirectGetProductDetail(productUrl string, purchaseSource string) (*TProduct, error) {
+	result := new(TProduct)
+	r := productUrl + purchaseSource + "!"
+	result.ProductUrl = &r
+	return result, nil
+}
+
+func (s *productServiceImplementation) DirectOnCacheEvict() error {
+	return nil
+}
+
 func TestMain(t *testing.T) {
 	var nc *nats.Conn
 	nc, _ = nats.Connect(nats.DefaultURL)
 	server := new(productServiceImplementation)
-	NewProductServer(server, nc)
+	s := NewProductServer(server, nc)
+	directKey := "testServer1"
+	s.SetDirectKey(directKey)
 	time.Sleep(10 * time.Millisecond)
 
 	client := ezrpc.NewClient("Product", nc)
@@ -48,8 +61,18 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	if *product.ProductUrl != "productUrlsurf" {
+		t.Error("server response error")
+	}
+
+	product, err = scr.DirectGetProductDetail("productUrl", "direct")
+	if err.Error() != "client DirectKey is empty" {
+		t.Error(err)
+	}
+
+	client.DirectKey = directKey
+	product, err = scr.DirectGetProductDetail("productUrl", "direct")
+	if *product.ProductUrl != "productUrldirect!" {
 		t.Error("server response error")
 	}
 }

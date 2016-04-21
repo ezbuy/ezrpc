@@ -40,7 +40,7 @@ namespace {{.Namespace}} {
 
 				switch (e.Message.Subject) {
 				{{- range $name, $method := .Service.Methods}}
-				{{- if not (IsBroadcastMethod $method)}}
+				{{- if not (Utils.IsBroadcastMethod $method)}}
 				case "{{$tmpldata.Service.Name}}.{{$name}}":
 					{{- if $method.Oneway}}
 					processor_.{{$name}}_Process(0, iprot, null);
@@ -71,7 +71,7 @@ namespace {{.Namespace}} {
 			try {
 				switch (e.Message.Subject) {
 				{{- range $name, $method := .Service.Methods}}
-				{{- if IsBroadcastMethod $method}}
+				{{- if Utils.IsBroadcastMethod $method}}
 				case "On.{{$tmpldata.Service.Name}}.{{$name}}":
 					processor_.{{$name}}_Process(0, iprot, null);
 					break;
