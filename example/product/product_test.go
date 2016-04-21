@@ -50,7 +50,6 @@ func TestMain(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	client := ezrpc.NewClient("Product", nc)
-	client.DirectKey = directKey
 	scr := ProductClient{Client: client}
 
 	err := scr.Ping()
@@ -67,9 +66,12 @@ func TestMain(t *testing.T) {
 	}
 
 	product, err = scr.DirectGetProductDetail("productUrl", "direct")
-	if err != nil {
+	if err.Error() != "client DirectKey is empty" {
 		t.Error(err)
 	}
+
+	client.DirectKey = directKey
+	product, err = scr.DirectGetProductDetail("productUrl", "direct")
 	if *product.ProductUrl != "productUrldirect!" {
 		t.Error("server response error")
 	}

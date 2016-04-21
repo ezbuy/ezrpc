@@ -2,6 +2,7 @@ package ezrpc
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"time"
 
@@ -29,6 +30,9 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 
 	var subject string
 	if strings.HasPrefix(method, "Direct") {
+		if c.DirectKey == "" {
+			return errors.New("client DirectKey is empty")
+		}
 		subject = c.DirectKey + "." + c.Serice + "." + method
 	} else {
 		subject = c.Serice + "." + method
