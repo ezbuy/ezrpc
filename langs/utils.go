@@ -6,6 +6,19 @@ import (
 	"github.com/samuel/go-thrift/parser"
 )
 
-func IsBroadcastMethod(m *parser.Method) bool {
+type Util struct {
+}
+
+func Utils() *Util {
+	return _util
+}
+
+var _util *Util
+
+func (u *Util) IsBroadcastMethod(m *parser.Method) bool {
 	return m.Oneway && strings.HasPrefix(m.Name, "On")
+}
+
+func (u *Util) IsDirectMethod(m *parser.Method) bool {
+	return m.Oneway && strings.HasPrefix(m.Name, "Direct")
 }

@@ -18,8 +18,8 @@ func Tpl() *template.Template {
 func init() {
 	tpl = template.New("ezrpc/golang")
 	funcMap := template.FuncMap{
-		"ToLower":           strings.ToLower,
-		"IsBroadcastMethod": langs.IsBroadcastMethod,
+		"ToLower": strings.ToLower,
+		"Utils":   langs.Utils,
 	}
 	tpl.Funcs(funcMap)
 	files := []string{

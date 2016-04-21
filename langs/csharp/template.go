@@ -32,8 +32,8 @@ func init() {
 	tpl = template.New("ezrpc/csharp")
 
 	funcs := template.FuncMap{
-		"ToLower":           strings.ToLower,
-		"IsBroadcastMethod": langs.IsBroadcastMethod,
+		"ToLower": strings.ToLower,
+		"Utils":   langs.Utils,
 	}
 	tpl.Funcs(funcs)
 

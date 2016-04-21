@@ -41,7 +41,7 @@ type ServerData struct {
 
 func (d ServerData) HasBroadcastMethod() bool {
 	for _, m := range d.Service.Methods {
-		if langs.IsBroadcastMethod(m) {
+		if langs.Utils().IsBroadcastMethod(m) {
 			return true
 		}
 	}
