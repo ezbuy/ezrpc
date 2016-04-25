@@ -44,7 +44,7 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 
 	msg, err := c.Conn.Request(subject, buf.Bytes(), 10*time.Second)
 	if err != nil {
-		println(err.Error())
+		return err
 	}
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
