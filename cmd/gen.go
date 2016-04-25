@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Wuvist/go-thrift/parser"
 	"github.com/ezbuy/ezrpc/langs"
 	_ "github.com/ezbuy/ezrpc/langs/csharp" // fullfill langs
 	_ "github.com/ezbuy/ezrpc/langs/go"
-	"github.com/samuel/go-thrift/parser"
 	"github.com/spf13/cobra"
 )
 

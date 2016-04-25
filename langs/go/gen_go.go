@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Wuvist/go-thrift/parser"
 	"github.com/ezbuy/ezrpc/langs"
-	"github.com/samuel/go-thrift/parser"
 )
 
 const langName = "go"
