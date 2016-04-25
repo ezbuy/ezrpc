@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Wuvist/go-thrift/thrift"
 	"github.com/nats-io/nats"
-	"github.com/samuel/go-thrift/thrift"
 )
 
 type Client struct {

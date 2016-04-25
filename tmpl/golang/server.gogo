@@ -5,7 +5,7 @@ import (
 	"bytes"
 
 	"github.com/nats-io/nats"
-	"github.com/samuel/go-thrift/thrift"
+	"github.com/Wuvist/go-thrift/thrift"
 	"github.com/ezbuy/statsd"
 )
 

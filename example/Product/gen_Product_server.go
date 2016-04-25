@@ -3,9 +3,9 @@ package product
 import (
 	"bytes"
 
-	"github.com/nats-io/nats"
-	"github.com/samuel/go-thrift/thrift"
+	"github.com/Wuvist/go-thrift/thrift"
 	"github.com/ezbuy/statsd"
+	"github.com/nats-io/nats"
 )
 
 type ThriftNatsProductServer struct {
@@ -96,7 +96,7 @@ func (s *ThriftNatsProductServer) onDirect(msg *nats.Msg) {
 
 func (s *ThriftNatsProductServer) SetDirectKey(key string) {
 	s.DirectKey = key
-	s.Conn.Subscribe(key + ".Product.*", s.onDirect)
+	s.Conn.Subscribe(key+".Product.*", s.onDirect)
 }
 
 func (s *ThriftNatsProductServer) onBroadcast(msg *nats.Msg) {

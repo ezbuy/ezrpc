@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/samuel/go-thrift/parser"
+	"github.com/Wuvist/go-thrift/parser"
 )
 
 type BaseGen struct {

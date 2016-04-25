@@ -1,6 +1,6 @@
 package langs
 
-import "github.com/samuel/go-thrift/parser"
+import "github.com/Wuvist/go-thrift/parser"
 
 type ApiGen interface {
 	Generate(output string, parsedThrift map[string]*parser.Thrift)

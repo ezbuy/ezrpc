@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Wuvist/go-thrift/parser"
 	"github.com/ezbuy/ezrpc/langs"
 	"github.com/ezbuy/ezrpc/tmpl"
-	"github.com/samuel/go-thrift/parser"
 )
 
 var tpl *template.Template

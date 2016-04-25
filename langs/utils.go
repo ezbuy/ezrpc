@@ -3,7 +3,7 @@ package langs
 import (
 	"strings"
 
-	"github.com/samuel/go-thrift/parser"
+	"github.com/Wuvist/go-thrift/parser"
 )
 
 type Util struct {
