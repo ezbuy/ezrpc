@@ -12,14 +12,14 @@ import (
 
 type Client struct {
 	Conn      *nats.Conn
-	Serice    string
+	Service   string
 	DirectKey string
 }
 
 func NewClient(service string, conn *nats.Conn) *Client {
 	return &Client{
-		Serice: service,
-		Conn:   conn,
+		Service: service,
+		Conn:    conn,
 	}
 }
 
@@ -33,9 +33,9 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 		if c.DirectKey == "" {
 			return errors.New("client DirectKey is empty")
 		}
-		subject = c.DirectKey + "." + c.Serice + "." + method
+		subject = c.DirectKey + "." + c.Service + "." + method
 	} else {
-		subject = c.Serice + "." + method
+		subject = c.Service + "." + method
 	}
 
 	if response == nil {
