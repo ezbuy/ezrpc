@@ -32,6 +32,13 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 	w := thrift.NewCompactProtocolWriter(buf)
 	thrift.EncodeStruct(w, request)
 
+	// 认为客户端 UNTIL 类请求是超长超时的请求
+	timeout := 10 * time.Second
+	if strings.HasPrefix(method, "UNTIL") {
+		timeout = time.Hour
+		method = method[5:]
+	}
+
 	var subject string
 	if strings.HasPrefix(method, "Direct") {
 		if c.DirectKey == "" {
@@ -53,7 +60,7 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 		return c.Conn.Publish(subject, buf.Bytes())
 	}
 
-	msg, err := c.Conn.Request(subject, buf.Bytes(), 10*time.Second)
+	msg, err := c.Conn.Request(subject, buf.Bytes(), timeout)
 	if err != nil {
 		println(err.Error())
 		return err
