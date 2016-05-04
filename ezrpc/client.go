@@ -10,6 +10,10 @@ import (
 	"github.com/nats-io/nats"
 )
 
+type OnewayRequest interface {
+	Oneway() bool
+}
+
 type Client struct {
 	Conn      *nats.Conn
 	Service   string
@@ -36,16 +40,25 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 		subject = c.DirectKey + "." + c.Service + "." + method
 	} else {
 		subject = c.Service + "." + method
+
+		if strings.HasPrefix(method, "On") {
+			if onewayReq, ok := request.(OnewayRequest); ok && onewayReq != nil && onewayReq.Oneway() {
+				subject = "On." + subject
+			}
+		}
 	}
 
+	// 认为客户端实现过程中 broadcast 类的请求始终 reponse == nil
 	if response == nil {
 		return c.Conn.Publish(subject, buf.Bytes())
 	}
 
 	msg, err := c.Conn.Request(subject, buf.Bytes(), 10*time.Second)
 	if err != nil {
+		println(err.Error())
 		return err
 	}
+
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	return thrift.DecodeStruct(r, response)
