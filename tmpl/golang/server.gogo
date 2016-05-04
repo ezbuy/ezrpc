@@ -149,8 +149,13 @@ func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) *ThriftNa
 	}
 
 	// all broadcast messages should be under namespace 'On'
-	server.Conn.Subscribe("On.{{$serviceName}}.*", server.onBroadcast)
-	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", server.onMsg)
+	server.Conn.Subscribe("On.{{$serviceName}}.*", func(msg *nats.Msg) {
+		go server.onBroadcast(msg)
+	})
+	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", func(msg *nats.Msg) {
+		go server.onMsg(msg)
+	})
+
 	return server
 }
 {{- end}}
