@@ -111,7 +111,9 @@ func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 
 func (s *ThriftNats{{$serviceName}}Server) SetDirectKey(key string) {
 	s.DirectKey = key
-	s.Conn.Subscribe(key + ".{{$serviceName}}.*", s.onDirect)
+	s.Conn.Subscribe(key + ".{{$serviceName}}.*", func(msg *nats.Msg) {
+		go s.onDirect(msg)
+	})
 }
 {{- end}}
 
