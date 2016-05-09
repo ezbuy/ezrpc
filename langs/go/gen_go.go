@@ -25,7 +25,13 @@ func getNamespace(namespaces map[string]string) string {
 }
 
 func genNamespace(namespace string) (string, string) {
-	path := strings.Replace(namespace, ".", "/", -1)
+	var path string
+	if strings.Contains(namespace, "..") {
+		path = strings.Replace(namespace, "..", "/", -1)
+	} else {
+		path = strings.Replace(namespace, ".", "/", -1)
+	}
+
 	pkgName := filepath.Base(path)
 	return path, pkgName
 }
