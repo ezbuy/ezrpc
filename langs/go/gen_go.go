@@ -55,6 +55,16 @@ func (d ServerData) HasBroadcastMethod() bool {
 	return false
 }
 
+func (d ServerData) HasNormalMsgMethod() bool {
+	for _, m := range d.Service.Methods {
+		if langs.Utils().IsNormalMethod(m) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (this *GoGen) Generate(output string, parsedThrift map[string]*parser.Thrift) {
 	this.BaseGen.Init(langName, parsedThrift)
 

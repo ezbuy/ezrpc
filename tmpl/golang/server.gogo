@@ -16,6 +16,7 @@ type ThriftNats{{$serviceName}}Server struct {
 }
 
 func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
+{{- if .HasNormalMsgMethod}}
 	r := thrift.NewCompactProtocolReader(bytes.NewReader(msg.Data))
 
 	switch msg.Subject {
@@ -59,6 +60,7 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 {{- end}}
 {{- end}}
 	}
+{{- end}}
 }
 
 {{- if Utils.HasDirectMethod .Service}}
