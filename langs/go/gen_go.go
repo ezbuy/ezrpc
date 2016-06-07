@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Wuvist/go-thrift/parser"
+	"github.com/ezbuy/ezrpc/global"
 	"github.com/ezbuy/ezrpc/langs"
 )
 
@@ -77,6 +78,10 @@ func (this *GoGen) Generate(output string, parsedThrift map[string]*parser.Thrif
 
 	fmt.Println("##### Parsing:")
 	for filename, parsed := range parsedThrift {
+		if !global.IsGenSrvRecursive && filename != global.InputFile {
+			continue
+		}
+
 		fmt.Printf("%s\n", filename)
 		namespace := getNamespace(parsed.Namespaces)
 		importPath, _ := genNamespace(namespace)
