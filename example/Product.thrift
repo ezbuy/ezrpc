@@ -1,6 +1,8 @@
 namespace go product
 namespace csharp Zen.DataAccess.Product
 
+include "Item.thrift"
+
 struct TShippingFee {
 	1:required string warehouse;	//仓库
 	2:required double fee;			//运费
