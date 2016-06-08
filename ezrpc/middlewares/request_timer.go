@@ -16,7 +16,7 @@ func RequestTimer() ezrpc.MsgMiddleware {
 
 			h(msg)
 
-			fmt.Printf("%s : %s\n", msg.Subject, time.Now().Sub(start))
+			fmt.Printf("REQ %s : %s\n", msg.Subject, time.Now().Sub(start))
 		}
 	}
 }
