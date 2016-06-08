@@ -4,15 +4,17 @@ package {{.Namespace}}
 import (
 	"bytes"
 
-	"github.com/nats-io/nats"
 	"github.com/Wuvist/go-thrift/thrift"
+	"github.com/ezbuy/ezrpc/ezrpc"
 	"github.com/ezbuy/statsd"
+	"github.com/nats-io/nats"
 )
 
 type ThriftNats{{$serviceName}}Server struct {
 	Server    *{{$serviceName}}Server
 	Conn      *nats.Conn
 	DirectKey string
+	Daemon    *ezrpc.Daemon
 }
 
 func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
@@ -113,9 +115,7 @@ func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 
 func (s *ThriftNats{{$serviceName}}Server) SetDirectKey(key string) {
 	s.DirectKey = key
-	s.Conn.Subscribe(key + ".{{$serviceName}}.*", func(msg *nats.Msg) {
-		go s.onDirect(msg)
-	})
+	s.Daemon.Subscribe(key+".{{$serviceName}}.*", s.onDirect)
 }
 {{- end}}
 
@@ -144,21 +144,20 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 {{- end}}
 }
 
-func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn) *ThriftNats{{$serviceName}}Server {
+func New{{$serviceName}}Server(impl {{$serviceName}}, conn *nats.Conn, middlewares ...ezrpc.MsgMiddleware) *ThriftNats{{$serviceName}}Server {
+	daemon := ezrpc.NewDaemonWithConn(conn, middlewares...)
+
 	s := &{{$serviceName}}Server{Implementation: impl}
 
 	server := &ThriftNats{{$serviceName}}Server{
 		Server: s,
 		Conn:   conn,
+		Daemon: daemon,
 	}
 
 	// all broadcast messages should be under namespace 'On'
-	server.Conn.Subscribe("On.{{$serviceName}}.*", func(msg *nats.Msg) {
-		go server.onBroadcast(msg)
-	})
-	server.Conn.QueueSubscribe("{{$serviceName}}.*", "ezrpc", func(msg *nats.Msg) {
-		go server.onMsg(msg)
-	})
+	daemon.Subscribe("On.{{$serviceName}}.*", server.onBroadcast)
+	daemon.QueueSubscribe("{{$serviceName}}.*", "ezrpc", server.onMsg)
 
 	return server
 }

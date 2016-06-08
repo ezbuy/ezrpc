@@ -13,7 +13,7 @@ import (
 
 type MsgMiddleware func(h nats.MsgHandler) nats.MsgHandler
 
-type MsgServer struct {
+type Daemon struct {
 	mutex sync.RWMutex
 	msgWg sync.WaitGroup
 
@@ -26,17 +26,17 @@ type MsgServer struct {
 	exit chan bool
 }
 
-func NewMsgServer(opts nats.Options, middlewares ...MsgMiddleware) (*MsgServer, error) {
+func NewDaemon(opts nats.Options, middlewares ...MsgMiddleware) (*Daemon, error) {
 	conn, err := opts.Connect()
 	if err != nil {
 		return nil, err
 	}
 
-	return NewMsgServerWithConn(conn, middlewares...), nil
+	return NewDaemonWithConn(conn, middlewares...), nil
 }
 
-func NewMsgServerWithConn(conn *nats.Conn, middlewares ...MsgMiddleware) *MsgServer {
-	server := &MsgServer{
+func NewDaemonWithConn(conn *nats.Conn, middlewares ...MsgMiddleware) *Daemon {
+	server := &Daemon{
 		timeout:       30 * time.Second,
 		conn:          conn,
 		subscriptions: make([]*nats.Subscription, 0),
@@ -47,13 +47,13 @@ func NewMsgServerWithConn(conn *nats.Conn, middlewares ...MsgMiddleware) *MsgSer
 	return server
 }
 
-func (this *MsgServer) Use(middlewares ...MsgMiddleware) {
+func (this *Daemon) Use(middlewares ...MsgMiddleware) {
 	this.mutex.Lock()
 	this.middelwares = append(this.middelwares, middlewares...)
 	this.mutex.Unlock()
 }
 
-func (this *MsgServer) Subscribe(subject string, h nats.MsgHandler) error {
+func (this *Daemon) Subscribe(subject string, h nats.MsgHandler) error {
 	h = this.buildMsgHandler(h)
 
 	sub, err := this.conn.Subscribe(subject, func(msg *nats.Msg) {
@@ -69,7 +69,7 @@ func (this *MsgServer) Subscribe(subject string, h nats.MsgHandler) error {
 	return nil
 }
 
-func (this *MsgServer) QueueSubscribe(subject, queue string, h nats.MsgHandler) error {
+func (this *Daemon) QueueSubscribe(subject, queue string, h nats.MsgHandler) error {
 	h = this.buildMsgHandler(h)
 
 	sub, err := this.conn.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
@@ -85,7 +85,7 @@ func (this *MsgServer) QueueSubscribe(subject, queue string, h nats.MsgHandler) 
 	return nil
 }
 
-func (this *MsgServer) Run() {
+func (this *Daemon) Run() {
 	fmt.Fprintln(os.Stdout, "nats msg server running")
 	go this.handleSignal()
 
@@ -96,7 +96,7 @@ func (this *MsgServer) Run() {
 	fmt.Fprintln(os.Stdout, "nats msg server stopped")
 }
 
-func (this *MsgServer) Stop() {
+func (this *Daemon) Stop() {
 	this.unsubscribeAll()
 
 	go this.waitForHandlers()
@@ -104,14 +104,14 @@ func (this *MsgServer) Stop() {
 
 }
 
-func (this *MsgServer) waitForHandlers() {
+func (this *Daemon) waitForHandlers() {
 	this.msgWg.Wait()
 
 	fmt.Fprintln(os.Stdout, "nats msg server: all handlers finished")
 	this.exit <- true
 }
 
-func (this *MsgServer) waitForTimeout() {
+func (this *Daemon) waitForTimeout() {
 	timer := time.NewTimer(this.timeout)
 	<-timer.C
 
@@ -119,7 +119,7 @@ func (this *MsgServer) waitForTimeout() {
 	this.exit <- true
 }
 
-func (this *MsgServer) handleSignal() {
+func (this *Daemon) handleSignal() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM)
 
@@ -127,7 +127,7 @@ func (this *MsgServer) handleSignal() {
 	this.Stop()
 }
 
-func (this *MsgServer) unsubscribeAll() {
+func (this *Daemon) unsubscribeAll() {
 	this.mutex.Lock()
 
 	subs := this.subscriptions
@@ -140,7 +140,7 @@ func (this *MsgServer) unsubscribeAll() {
 	}
 }
 
-func (this *MsgServer) addSubscription(sub *nats.Subscription) {
+func (this *Daemon) addSubscription(sub *nats.Subscription) {
 	this.mutex.Lock()
 
 	this.subscriptions = append(this.subscriptions, sub)
@@ -148,7 +148,7 @@ func (this *MsgServer) addSubscription(sub *nats.Subscription) {
 	this.mutex.Unlock()
 }
 
-func (this *MsgServer) buildMsgHandler(h nats.MsgHandler) nats.MsgHandler {
+func (this *Daemon) buildMsgHandler(h nats.MsgHandler) nats.MsgHandler {
 	handler := func(msg *nats.Msg) {
 		this.msgWg.Add(1)
 		defer this.msgWg.Done()
