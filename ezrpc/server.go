@@ -141,6 +141,8 @@ func (this *Daemon) unsubscribeAll() {
 }
 
 func (this *Daemon) addSubscription(sub *nats.Subscription) {
+	fmt.Printf("SUB %q\n", sub.Subject)
+
 	this.mutex.Lock()
 
 	this.subscriptions = append(this.subscriptions, sub)
