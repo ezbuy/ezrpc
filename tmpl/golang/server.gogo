@@ -3,6 +3,7 @@ package {{.Namespace}}
 {{$serviceName := .Service.Name}}
 import (
 	"bytes"
+	"log"
 
 	"github.com/Wuvist/go-thrift/thrift"
 	"github.com/ezbuy/ezrpc/ezrpc"
@@ -29,11 +30,11 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		p := &{{$serviceName}}{{$method.Name}}Request{}
 		err := thrift.DecodeStruct(r, p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] decode error: %s", err)
 		}
 		err = s.Server.{{$method.Name}}(p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] service error: %s", err)
 		}
 
 		statsd.Incr("{{$serviceName}}.{{$method.Name}}.count")
@@ -44,11 +45,11 @@ func (s *ThriftNats{{$serviceName}}Server) onMsg(msg *nats.Msg) {
 		res := &{{$serviceName}}{{$method.Name}}Response{}
 		err := thrift.DecodeStruct(r, p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] decode error: %s", err)
 		}
 		err = s.Server.{{$method.Name}}(p, res)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] service error: %s", err)
 		}
 
 		buf := &bytes.Buffer{}
@@ -78,11 +79,11 @@ func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 		p := &{{$serviceName}}{{$method.Name}}Request{}
 		err := thrift.DecodeStruct(r, p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] decode error: %s", err)
 		}
 		err = s.Server.{{$method.Name}}(p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] service error: %s", err)
 		}
 
 		statsd.Incr("{{$serviceName}}.{{$method.Name}}.count")
@@ -93,11 +94,11 @@ func (s *ThriftNats{{$serviceName}}Server) onDirect(msg *nats.Msg) {
 		res := &{{$serviceName}}{{$method.Name}}Response{}
 		err := thrift.DecodeStruct(r, p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] decode error: %s", err)
 		}
 		err = s.Server.{{$method.Name}}(p, res)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] service error: %s", err)
 		}
 
 		buf := &bytes.Buffer{}
@@ -130,11 +131,11 @@ func (s *ThriftNats{{$serviceName}}Server) onBroadcast(msg *nats.Msg) {
 		p := &{{$serviceName}}{{$method.Name}}Request{}
 		err := thrift.DecodeStruct(r, p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] decode error: %s", err)
 		}
 		err = s.Server.{{$method.Name}}(p)
 		if err != nil {
-			println(err)
+			log.Printf("[NATS]-[{{$serviceName}}.{{$method.Name}}] service error: %s", err)
 		}
 
 		statsd.Incr("On.{{$serviceName}}.{{$method.Name}}.count")
