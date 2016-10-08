@@ -18,12 +18,22 @@ type Client struct {
 	Conn      *nats.Conn
 	Service   string
 	DirectKey string
+	Timeout   time.Duration
 }
 
 func NewClient(service string, conn *nats.Conn) *Client {
+	return NewClientTimeout(service, 10*time.Second, conn)
+}
+
+func NewClientTimeout(service string, timeout time.Duration, conn *nats.Conn) *Client {
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+
 	return &Client{
 		Service: service,
 		Conn:    conn,
+		Timeout: timeout,
 	}
 }
 
@@ -33,9 +43,12 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 	thrift.EncodeStruct(w, request)
 
 	// 认为客户端 UNTIL 类请求是超长超时的请求
-	timeout := 10 * time.Second
+	timeout := c.Timeout
 	if strings.HasPrefix(method, "UNTIL") {
-		timeout = time.Hour
+		if c.Timeout < time.Hour {
+			timeout = time.Hour
+		}
+
 		method = method[5:]
 	}
 
