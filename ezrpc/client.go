@@ -15,26 +15,47 @@ type OnewayRequest interface {
 }
 
 type Client struct {
+	cfg       *Config
 	Conn      *nats.Conn
 	Service   string
 	DirectKey string
-	Timeout   time.Duration
 }
 
 func NewClient(service string, conn *nats.Conn) *Client {
-	return NewClientTimeout(service, 10*time.Second, conn)
+	return NewClientEx(&Config{}, service, conn)
 }
 
-func NewClientTimeout(service string, timeout time.Duration, conn *nats.Conn) *Client {
-	if timeout <= 0 {
-		timeout = 10 * time.Second
-	}
+type Config struct {
+	Timeout time.Duration
+	Reties  int
+}
 
+func (cfg *Config) init() {
+	if cfg.Timeout <= 0 {
+		cfg.Timeout = 10 * time.Second
+	}
+}
+
+func NewFastRetryClient(service string, conn *nats.Conn) *Client {
+	return NewClientEx(&Config{
+		Timeout: 2 * time.Second,
+		Reties:  3,
+	}, service, conn)
+}
+
+func NewClientEx(cfg *Config, service string, conn *nats.Conn) *Client {
 	return &Client{
 		Service: service,
 		Conn:    conn,
-		Timeout: timeout,
+		cfg:     cfg,
 	}
+
+}
+
+func NewClientTimeout(service string, timeout time.Duration, conn *nats.Conn) *Client {
+	return NewClientEx(&Config{
+		Timeout: timeout,
+	}, service, conn)
 }
 
 func (c *Client) Call(method string, request interface{}, response interface{}) error {
@@ -43,9 +64,9 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 	thrift.EncodeStruct(w, request)
 
 	// 认为客户端 UNTIL 类请求是超长超时的请求
-	timeout := c.Timeout
+	timeout := c.cfg.Timeout
 	if strings.HasPrefix(method, "UNTIL") {
-		if c.Timeout < time.Hour {
+		if c.cfg.Timeout < time.Hour {
 			timeout = time.Hour
 		}
 
@@ -73,9 +94,17 @@ func (c *Client) Call(method string, request interface{}, response interface{}) 
 		return c.Conn.Publish(subject, buf.Bytes())
 	}
 
+	retryTime := c.cfg.Reties
+retry:
 	msg, err := c.Conn.Request(subject, buf.Bytes(), timeout)
+	if err == nats.ErrTimeout {
+		if retryTime > 0 {
+			time.Sleep(100 * time.Millisecond)
+			retryTime--
+			goto retry
+		}
+	}
 	if err != nil {
-		println(err.Error())
 		return err
 	}
 
