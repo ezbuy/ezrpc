@@ -100,6 +100,7 @@ retry:
 	if err == nats.ErrTimeout {
 		if retryTime > 0 {
 			time.Sleep(100 * time.Millisecond)
+			retryTime--
 			goto retry
 		}
 	}
