@@ -44,6 +44,7 @@ func NewFastRetryClient(service string, conn *nats.Conn) *Client {
 }
 
 func NewClientEx(cfg *Config, service string, conn *nats.Conn) *Client {
+	cfg.init()
 	return &Client{
 		Service: service,
 		Conn:    conn,
